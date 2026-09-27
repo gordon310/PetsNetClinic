@@ -1,0 +1,11 @@
+{
+  "name": "petsnetclinic",
+  "version": "1.0.0",
+  "private": true,
+  "description": "宠物线上问诊小程序 · 医生需求收集与记录",
+  "scripts": {
+    "test": "node tests/logic.test.mjs",
+    "test:render": "node tests/render.mjs",
+    "test:all": "node tests/logic.test.mjs && node tests/render.mjs"
+  }
+}

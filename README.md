@@ -12,15 +12,24 @@
 ```
 PetsNetClinic/
 ├── README.md
-├── index.html                       可视化问卷（可填写 / 提交 / 导出 / 打印）
+├── index.html                       医生填写页（单按钮提交）
+├── records.html                     答卷记录页（完成情况 / 明细 / CSV）
 ├── questionnaire.md                 问卷唯一维护源
+├── package.json                     测试脚本
 ├── .github/ISSUE_TEMPLATE/
-│   ├── doctor-requirements.yml      GitHub Issue 表单（33 题结构化）
+│   ├── doctor-requirements.yml      GitHub Issue 表单（53 题结构化）
 │   └── config.yml                   新增 issue 引导
 ├── docs/
 │   └── 宠物线上问诊开发需求文档_V0.2.md
-└── scripts/
-    └── export_issues.py             导出全部答卷为 CSV / Markdown 汇总
+├── relay/                           Cloudflare Worker 中转（可选，实现“提交→谢谢”）
+│   ├── worker.js
+│   ├── wrangler.toml
+│   └── README.md
+├── scripts/
+│   └── export_issues.py             导出全部答卷为 CSV / Markdown 汇总
+└── tests/
+    ├── logic.test.mjs               逻辑测试（只读）
+    └── render.mjs                   无头 Chrome 渲染测试
 ```
 
 ## 仓库信息
@@ -59,6 +68,17 @@ PetsNetClinic/
 
 - 修改问卷：先改 `questionnaire.md`，再同步 `index.html` 的 `SECTIONS` 与 `doctor-requirements.yml`。
 - 收到答卷后：在 `docs/宠物线上问诊开发需求文档_V0.2.md` 中把对应 `【待确认】` 回填，并标注来源医生 / 日期。
+
+## 测试
+
+只读测试，不会创建或修改任何记录。
+
+```bash
+npm test          # 逻辑（提交 URL / Markdown 往返 / 导出 / Worker）
+npm run test:all  # 逻辑 + 无头浏览器渲染
+```
+
+详见 `tests/README.md`。
 
 ## 导出留档
 
