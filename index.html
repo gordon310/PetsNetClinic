@@ -113,15 +113,11 @@
 
   <form id="form" novalidate></form>
   <div id="status" role="status" aria-live="polite"></div>
-  <footer class="note">提交后答案会以 GitHub Issue 形式留档；也可导出 JSON / 打印为 PDF 自行保存。</footer>
+  <footer class="note">提交后会以 GitHub Issue 形式留档，可追溯提交医生与时间。</footer>
 </div>
 
 <div class="bar">
-  <button type="button" class="primary" id="btn-submit">提交到 GitHub</button>
-  <button type="button" id="btn-md">复制 Markdown</button>
-  <button type="button" id="btn-json">导出 JSON</button>
-  <button type="button" id="btn-print">打印 / PDF</button>
-  <button type="button" id="btn-reset">清空</button>
+  <button type="button" class="primary" id="btn-submit">提交</button>
 </div>
 
 <script>
@@ -407,7 +403,7 @@ function validate(a) {
   return missing;
 }
 
-/* ---------- 输出 ---------- */
+/* ---------- 输出（精简：只列已选答案，控制 URL 长度） ---------- */
 function toMarkdown(a) {
   const lines = [];
   lines.push("# 宠物线上问诊小程序 · 医生需求确认表 V0.3");
@@ -417,30 +413,20 @@ function toMarkdown(a) {
   lines.push("- 填写日期：" + (a.fill_date || ""));
   lines.push("- 工号 / 联系方式：" + (a.doctor_contact || "（未填）"));
   lines.push("");
-  lines.push("---");
   SECTIONS.forEach(sec => {
-    const qs = sec.questions.filter(q => q.id.startsWith("q"));
-    if (!qs.length) return;
-    lines.push("");
-    lines.push("## " + sec.title);
-    qs.forEach(q => {
-      lines.push("");
+    sec.questions.filter(q => q.id.startsWith("q")).forEach(q => {
+      lines.push("**" + q.num + ". " + q.label + "**");
       if (q.type === "multi") {
-        lines.push("**" + q.num + ". " + q.label + "**");
         const sel = a[q.id] || [];
-        q.options.forEach(o => lines.push("- [" + (sel.includes(o) ? "x" : " ") + "] " + o));
+        (sel.length ? sel : ["（未选择）"]).forEach(o => lines.push("- " + o));
       } else if (q.type === "single") {
-        lines.push("**" + q.num + ". " + q.label + "**");
-        lines.push("");
         lines.push("- " + (a[q.id] || "（未回答）"));
       } else {
-        lines.push("**" + q.num + ". " + q.label + "**");
-        lines.push("");
         lines.push(a[q.id] || "（未填写）");
       }
+      lines.push("");
     });
   });
-  lines.push("");
   return lines.join("\n");
 }
 
@@ -471,21 +457,20 @@ function onSubmit() {
     return;
   }
   const url = issueUrl(a);
-  if (url.length > 7500) {
-    setStatus("内容较长，已打开 GitHub 页面；若标题/正文未自动填入，请改用「复制 Markdown」粘贴。", "err");
-  } else {
+  if (url.length <= 8000) {
     setStatus("已在新标签页打开 GitHub 提交页，请检查后点击 Submit new issue。", "ok");
+    window.open(url, "_blank", "noopener");
+    return;
   }
-  window.open(url, "_blank", "noopener");
-}
-
-function onCopyMd() {
-  const md = toMarkdown(collect());
-  const done = () => setStatus("已复制 Markdown，可粘贴到 GitHub Issue 或文档中。", "ok");
+  const body = toMarkdown(a);
+  const done = () => {
+    setStatus("答案已复制。请在打开的 GitHub 页面填写标题（含姓名）并粘贴正文后提交。", "err");
+    window.open("https://github.com/" + GITHUB_REPO + "/issues/new", "_blank", "noopener");
+  };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(md).then(done, () => fallbackCopy(md, done));
+    navigator.clipboard.writeText(body).then(done, () => fallbackCopy(body, done));
   } else {
-    fallbackCopy(md, done);
+    fallbackCopy(body, done);
   }
 }
 
@@ -499,32 +484,8 @@ function fallbackCopy(text, done) {
   document.body.removeChild(ta);
 }
 
-function onJson() {
-  const a = collect();
-  const data = { form: "宠物线上问诊小程序-医生快速需求确认表-V0.3", submitted_at: new Date().toISOString(), answers: a };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "医生需求确认表_" + (a.doctor_name || "未署名") + "_" + (a.fill_date || "") + ".json";
-  link.click();
-  URL.revokeObjectURL(url);
-  setStatus("已导出 JSON 文件。", "ok");
-}
-
-function onReset() {
-  if (!confirm("确定清空所有已填写内容？")) return;
-  document.getElementById("form").reset();
-  document.querySelectorAll("label.opt.checked").forEach(l => l.classList.remove("checked"));
-  setStatus("已清空。", "");
-}
-
 render();
 document.getElementById("btn-submit").addEventListener("click", onSubmit);
-document.getElementById("btn-md").addEventListener("click", onCopyMd);
-document.getElementById("btn-json").addEventListener("click", onJson);
-document.getElementById("btn-print").addEventListener("click", () => window.print());
-document.getElementById("btn-reset").addEventListener("click", onReset);
 </script>
 </body>
 </html>

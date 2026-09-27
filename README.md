@@ -26,9 +26,12 @@ PetsNetClinic/
 ## 仓库信息
 
 - 仓库：https://github.com/gordon310/PetsNetClinic
-- 在线填写页（GitHub Pages）：https://gordon310.github.io/PetsNetClinic/
-- 医生提交入口（Issue 表单）：https://github.com/gordon310/PetsNetClinic/issues/new/choose
+- **医生填写页（单按钮提交）**：https://gordon310.github.io/PetsNetClinic/
+- **答卷记录页（内部查看完成情况）**：https://gordon310.github.io/PetsNetClinic/records.html
+- 医生提交入口（Issue 表单，备用）：https://github.com/gordon310/PetsNetClinic/issues/new/choose
 - 建议在仓库 `Settings → Labels` 保持 `doctor-feedback` 标签存在，便于筛选导出。
+
+> 记录页会展示每位医生的提交次数、最近提交时间与状态，并支持按姓名/医院过滤、导出 CSV。
 
 ## 医生如何填写
 
