@@ -89,6 +89,12 @@
     .info-grid { grid-template-columns: 1fr; }
     .four { grid-template-columns: 1fr; }
   }
+  .done { position: fixed; inset: 0; background: rgba(15,23,42,.72); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .done-card { background: #fff; border-radius: 18px; padding: 36px 30px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .done-icon { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: #dcfce7; color: #16a34a; font-size: 34px; line-height: 64px; }
+  .done-card h2 { margin: 6px 0 8px; font-size: 22px; }
+  .done-card p { color: var(--muted); margin: 0 0 20px; }
+  .done-card button { padding: 10px 22px; }
   @media print {
     body { background: #fff; }
     .bar, footer.note { display: none; }
@@ -116,6 +122,15 @@
   <footer class="note">提交后会以 GitHub Issue 形式留档，可追溯提交医生与时间。</footer>
 </div>
 
+<div id="done" class="done" hidden>
+  <div class="done-card">
+    <div class="done-icon">✓</div>
+    <h2>提交成功，谢谢！</h2>
+    <p>您的答卷已记录，可以关闭此页面了。</p>
+    <button type="button" id="btn-done">知道了</button>
+  </div>
+</div>
+
 <div class="bar">
   <button type="button" class="primary" id="btn-submit">提交</button>
 </div>
@@ -126,6 +141,12 @@
    ============================================================ */
 const GITHUB_REPO = "gordon310/PetsNetClinic";
 const ISSUE_LABEL = "doctor-feedback";
+
+/* 中转服务地址：部署 relay/ 后填入，例如
+   "https://petsnetclinic-relay.<你的子域>.workers.dev/"
+   留空则回退为“打开 GitHub 提交页”的旧流程。 */
+const RELAY_URL = "";
+const FORM_KEY = ""; // 与 Worker 的 FORM_KEY 一致（可选）
 
 /* ---------- 问卷数据模型（与 questionnaire.md 保持一致） ---------- */
 const SECTIONS = [
@@ -426,8 +447,12 @@ function toMarkdown(a) {
   return lines.join("\n");
 }
 
+function issueTitle(a) {
+  return "[医生答卷] " + (a.doctor_name || "未署名") + " / " + (a.fill_date || "");
+}
+
 function issueUrl(a) {
-  const title = "[医生答卷] " + (a.doctor_name || "未署名") + " / " + (a.fill_date || "");
+  const title = issueTitle(a);
   const body = toMarkdown(a);
   const base = "https://github.com/" + GITHUB_REPO + "/issues/new";
   const params = "title=" + encodeURIComponent(title) +
@@ -452,6 +477,7 @@ function onSubmit() {
     if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
+  if (RELAY_URL) { submitViaRelay(a); return; }
   const url = issueUrl(a);
   if (url.length <= 8000) {
     setStatus("已在新标签页打开 GitHub 提交页，请检查后点击 Submit new issue。", "ok");
@@ -470,6 +496,32 @@ function onSubmit() {
   }
 }
 
+function submitViaRelay(a) {
+  const btn = document.getElementById("btn-submit");
+  btn.disabled = true;
+  setStatus("正在提交…", "");
+  const headers = { "Content-Type": "application/json" };
+  if (FORM_KEY) headers["x-form-key"] = FORM_KEY;
+  fetch(RELAY_URL, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({ title: issueTitle(a), body: toMarkdown(a) })
+  }).then(r => {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(() => {
+    showDone();
+  }).catch(e => {
+    btn.disabled = false;
+    setStatus("提交失败：" + e.message + "。请重试，或联系管理员。", "err");
+  });
+}
+
+function showDone() {
+  document.getElementById("done").hidden = false;
+  window.scrollTo(0, 0);
+}
+
 function fallbackCopy(text, done) {
   const ta = document.createElement("textarea");
   ta.value = text;
@@ -482,6 +534,10 @@ function fallbackCopy(text, done) {
 
 render();
 document.getElementById("btn-submit").addEventListener("click", onSubmit);
+document.getElementById("btn-done").addEventListener("click", () => {
+  document.getElementById("done").hidden = true;
+  try { window.close(); } catch (e) {}
+});
 </script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+name = "petsnetclinic-relay"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+GITHUB_REPO = "gordon310/PetsNetClinic"
+ALLOWED_ORIGIN = "https://gordon310.github.io"
+
+# 密钥不写在此文件，用命令设置：
+#   wrangler secret put GITHUB_TOKEN
+#   wrangler secret put FORM_KEY

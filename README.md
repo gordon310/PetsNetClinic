@@ -31,7 +31,13 @@ PetsNetClinic/
 - 医生提交入口（Issue 表单，备用）：https://github.com/gordon310/PetsNetClinic/issues/new/choose
 - 建议在仓库 `Settings → Labels` 保持 `doctor-feedback` 标签存在，便于筛选导出。
 
-> 记录页会展示每位医生的提交次数、最近提交时间与状态，并支持按姓名/医院过滤、导出 CSV。
+> 记录页会展示每位医生的提交次数、最近提交时间与状态，并支持按姓名过滤、导出 CSV。
+
+### 提交方式（两种）
+
+- **默认（未部署中转）**：点「提交」会打开 GitHub 新建 Issue 页，医生需登录 GitHub 并点一次 Submit。
+- **推荐（部署中转后）**：点「提交」→ 数据由中转服务写入 Issue → 页面显示「谢谢」，医生直接关闭浏览器，全程不接触 GitHub。
+  部署见 `relay/README.md`，完成后在 `index.html` 填入 `RELAY_URL` 与 `FORM_KEY` 即可切换。
 
 ## 医生如何填写
 
