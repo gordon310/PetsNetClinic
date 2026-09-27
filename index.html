@@ -123,7 +123,7 @@
   <footer class="note">提交后会以 GitHub Issue 形式留档，可追溯提交医生与时间。</footer>
 </div>
 
-<div id="done" class="done" hidden>
+<div id="done" class="done" style="display:none">
   <div class="done-card">
     <div class="done-icon">✓</div>
     <h2>提交成功，谢谢！</h2>
@@ -519,7 +519,7 @@ function submitViaRelay(a) {
 }
 
 function showDone() {
-  document.getElementById("done").hidden = false;
+  document.getElementById("done").style.display = "flex";
   window.scrollTo(0, 0);
 }
 
@@ -536,7 +536,7 @@ function fallbackCopy(text, done) {
 render();
 document.getElementById("btn-submit").addEventListener("click", onSubmit);
 document.getElementById("btn-done").addEventListener("click", () => {
-  document.getElementById("done").hidden = true;
+  document.getElementById("done").style.display = "none";
   try { window.close(); } catch (e) {}
 });
 </script>
