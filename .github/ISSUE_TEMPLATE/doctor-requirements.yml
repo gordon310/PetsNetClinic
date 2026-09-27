@@ -1,17 +1,18 @@
-name: 医生需求确认表 V0.2
-description: 宠物线上问诊小程序 · 医生快速需求确认表（约 5–8 分钟）
+name: 医生需求确认表 V0.3
+description: 宠物线上问诊小程序 · 医生快速需求确认表（约 10–12 分钟）
 title: "[医生答卷] "
 labels: ["doctor-feedback"]
 body:
   - type: markdown
     attributes:
       value: |
-        感谢填写《宠物线上问诊小程序 · 医生快速需求确认表 V0.2》。
+        感谢填写《宠物线上问诊小程序 · 医生快速需求确认表 V0.3》。
 
         本表用于确认：① 什么可以线上问 ② 什么必须到医院 ③ AI 可以/不可以做什么 ④ 医生希望系统怎样提高效率。
 
         > 提交后请勿删除本 Issue —— 它会被用作需求留档与开发文档回填依据。
-        > 标记「可多选」的题目可勾选多项；第 29 题请选 5 项，第 30 题最多选 3 项。
+        > 共 53 题。标记「可多选」的题目可勾选多项；第 29 题请选 5 项，第 30 题最多选 3 项。
+        > 第 34–53 题为 V0.3 新增（影像/视频 AI、安全兜底、交互与介入、建档通知、到院闭环、AI 闭环）。
 
   - type: input
     id: doctor_name
@@ -551,3 +552,248 @@ body:
       placeholder: 选填
     validations:
       required: false
+
+  # ---------- 十九、影像 / 视频 AI 辅助 ----------
+  - type: checkboxes
+    id: q34
+    attributes:
+      label: "34. 哪些症状适合用 AI 图像 / 视频识别辅助？（可多选）"
+      options:
+        - label: 皮肤
+        - label: 眼睛
+        - label: 耳朵
+        - label: 牙齿 / 口腔
+        - label: 步态 / 跛行
+        - label: 呼吸 / 咳嗽
+        - label: 外伤
+        - label: 肿块
+        - label: 呕吐物
+        - label: 排泄物
+        - label: 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q35
+    attributes:
+      label: "35. AI 影像 / 视频识别结果可以给谁看？（单选）"
+      options:
+        - 只进医生后台，不直接给客户
+        - 可直接给客户，但必须标注「仅供参考、不能替代医生诊断」
+        - 两者都可
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q36
+    attributes:
+      label: "36. AI 影像结论的表述上限？（单选）"
+      options:
+        - 只提示「可能存在某类问题」
+        - 可提示可能性，但必须注明不能替代医生诊断
+        - 可以给出初步判断
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q37
+    attributes:
+      label: "37. AI 影像 / 视频结果是否必须标注免责声明？（单选）"
+      options:
+        - 必须
+        - 建议
+        - 不需要
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q38
+    attributes:
+      label: "38. 影像拍摄质量与要求由谁定义？（单选）"
+      options:
+        - 医院统一模板
+        - 系统默认模板
+        - 医生按病例临时要求
+        - 不需要统一
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q39
+    attributes:
+      label: "39. 上传的影像是否留存并用于 AI 训练或知识库？（单选）"
+      options:
+        - 不留存，用完即删
+        - 留存但脱敏
+        - 留存并可用于训练（需客户授权）
+    validations:
+      required: true
+
+  # ---------- 二十、安全兜底与知情同意 ----------
+  - type: checkboxes
+    id: q40
+    attributes:
+      label: "40. 触发「必须到院」或红色风险时，系统应如何提醒客户？（可多选）"
+      options:
+        - label: 强提醒弹窗
+        - label: 必须点击「已读」才能关闭
+        - label: 短信或电话通知
+        - label: 直接给出到院地址与导航
+        - label: 仅文字提示
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q41
+    attributes:
+      label: "41. 客户是否必须先同意免责声明与知情同意才能开始问诊？（单选）"
+      options:
+        - 必须
+        - 可不强制
+        - 不需要
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q42
+    attributes:
+      label: "42. AI 无法判断或信息不足时，系统的兜底方式？（单选）"
+      options:
+        - 转人工医生
+        - 直接建议到院
+        - 提示补充资料
+        - 给一般护理建议
+    validations:
+      required: true
+
+  # ---------- 二十一、问诊交互与医生介入 ----------
+  - type: dropdown
+    id: q43
+    attributes:
+      label: "43. 客户与 AI 的问诊交互形式？（单选）"
+      options:
+        - 聊天式自由输入
+        - 结构化表单选择
+        - 混合（表单为主，可补充文字）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q44
+    attributes:
+      label: "44. 客户是否可以用语音描述症状？（单选）"
+      options:
+        - 需要
+        - 可有可无
+        - 不需要
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q45
+    attributes:
+      label: "45. 医生应在什么时机介入？（单选）"
+      options:
+        - AI 问诊完成后转医生
+        - 客户随时可转人工
+        - 仅红色风险自动转医生
+        - 由医生自行决定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q46
+    attributes:
+      label: "46. 医生不在线时如何处理新问诊？（单选）"
+      options:
+        - 留言待医生回复
+        - 自动转其他在线医生
+        - 提示医生在线时间
+        - 仅按排班开放入口
+    validations:
+      required: true
+
+  # ---------- 二十二、客户建档与通知 ----------
+  - type: dropdown
+    id: q47
+    attributes:
+      label: "47. 客户是否需要注册并绑定手机号才能问诊？（单选）"
+      options:
+        - 必须
+        - 可匿名先问
+        - 不需要
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q48
+    attributes:
+      label: "48. 是否支持一个账号下多宠物、家庭成员共享档案？（单选）"
+      options:
+        - 都要
+        - 仅多宠物
+        - 仅家庭共享
+        - 不需要
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: q49
+    attributes:
+      label: "49. 客户收到医生回复的提醒方式？（可多选）"
+      options:
+        - label: 微信订阅消息
+        - label: 短信
+        - label: 站内消息
+        - label: 电话
+        - label: 不需要提醒
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q50
+    attributes:
+      label: "50. 复诊提醒规则应由谁设定？（单选）"
+      options:
+        - 医生按病例设定
+        - 系统按病种默认
+        - 客户自选
+        - 不需要复诊提醒
+    validations:
+      required: true
+
+  # ---------- 二十三、到院闭环 ----------
+  - type: dropdown
+    id: q51
+    attributes:
+      label: "51. 线上病例是否需要与院内系统（HIS / 电子病历）打通？（单选）"
+      options:
+        - 需要打通
+        - 暂不打通，人工录入
+        - 后期再做
+        - 不需要
+    validations:
+      required: true
+
+  - type: dropdown
+    id: q52
+    attributes:
+      label: "52. 到院就诊后，结果是否需要回写到宠物健康档案？（单选）"
+      options:
+        - 需要自动回写
+        - 需要医生手动录入
+        - 不需要
+    validations:
+      required: true
+
+  # ---------- 二十四、AI 辅助闭环 ----------
+  - type: dropdown
+    id: q53
+    attributes:
+      label: "53. AI 辅助结论是否需要医生一键采纳 / 驳回并反馈（用于改进）？（单选）"
+      options:
+        - 需要
+        - 可选
+        - 不需要
+    validations:
+      required: true

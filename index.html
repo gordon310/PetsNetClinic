@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>宠物线上问诊小程序 · 医生快速需求确认表 V0.2</title>
+<title>宠物线上问诊小程序 · 医生快速需求确认表 V0.3</title>
 <style>
   :root {
     --bg: #f5f7fa;
@@ -100,8 +100,8 @@
 <body>
 <div class="wrap">
   <header class="page">
-    <h1>宠物线上问诊小程序 · 医生快速需求确认表 V0.2</h1>
-    <p>填写时间：约 5–8 分钟</p>
+    <h1>宠物线上问诊小程序 · 医生快速需求确认表 V0.3</h1>
+    <p>填写时间：约 10–12 分钟</p>
     <p>本表用于确认线上问诊的实际流程、风险边界及医生工作方式。带 <span style="color:#fca5a5">*</span> 为必填。</p>
     <div class="four">
       <span>① 什么可以线上问</span>
@@ -259,6 +259,58 @@ const SECTIONS = [
       options: ["愿意","可以偶尔参与","暂时不参与"] },
     { id: "q33", num: 33, type: "text", label: "如有特别重要的问题，可补充一句：", required: false, placeholder: "选填" },
   ]},
+  { title: "十九、影像 / 视频 AI 辅助（新增）", questions: [
+    { id: "q34", num: 34, type: "multi", label: "哪些症状适合用 AI 图像 / 视频识别辅助？", required: true, options: [
+      "皮肤","眼睛","耳朵","牙齿 / 口腔","步态 / 跛行","呼吸 / 咳嗽","外伤","肿块","呕吐物","排泄物","其他" ]},
+    { id: "q35", num: 35, type: "single", label: "AI 影像 / 视频识别结果可以给谁看？", required: true,
+      options: ["只进医生后台，不直接给客户","可直接给客户，但必须标注「仅供参考、不能替代医生诊断」","两者都可"] },
+    { id: "q36", num: 36, type: "single", label: "AI 影像结论的表述上限？", required: true,
+      options: ["只提示「可能存在某类问题」","可提示可能性，但必须注明不能替代医生诊断","可以给出初步判断"] },
+    { id: "q37", num: 37, type: "single", label: "AI 影像 / 视频结果是否必须标注免责声明？", required: true,
+      options: ["必须","建议","不需要"] },
+    { id: "q38", num: 38, type: "single", label: "影像拍摄质量与要求由谁定义？", required: true,
+      options: ["医院统一模板","系统默认模板","医生按病例临时要求","不需要统一"] },
+    { id: "q39", num: 39, type: "single", label: "上传的影像是否留存并用于 AI 训练或知识库？", required: true,
+      options: ["不留存，用完即删","留存但脱敏","留存并可用于训练（需客户授权）"] },
+  ]},
+  { title: "二十、安全兜底与知情同意（新增）", questions: [
+    { id: "q40", num: 40, type: "multi", label: "触发「必须到院」或红色风险时，系统应如何提醒客户？", required: true, options: [
+      "强提醒弹窗","必须点击「已读」才能关闭","短信或电话通知","直接给出到院地址与导航","仅文字提示" ]},
+    { id: "q41", num: 41, type: "single", label: "客户是否必须先同意免责声明与知情同意才能开始问诊？", required: true,
+      options: ["必须","可不强制","不需要"] },
+    { id: "q42", num: 42, type: "single", label: "AI 无法判断或信息不足时，系统的兜底方式？", required: true,
+      options: ["转人工医生","直接建议到院","提示补充资料","给一般护理建议"] },
+  ]},
+  { title: "二十一、问诊交互与医生介入（新增）", questions: [
+    { id: "q43", num: 43, type: "single", label: "客户与 AI 的问诊交互形式？", required: true,
+      options: ["聊天式自由输入","结构化表单选择","混合（表单为主，可补充文字）"] },
+    { id: "q44", num: 44, type: "single", label: "客户是否可以用语音描述症状？", required: true,
+      options: ["需要","可有可无","不需要"] },
+    { id: "q45", num: 45, type: "single", label: "医生应在什么时机介入？", required: true,
+      options: ["AI 问诊完成后转医生","客户随时可转人工","仅红色风险自动转医生","由医生自行决定"] },
+    { id: "q46", num: 46, type: "single", label: "医生不在线时如何处理新问诊？", required: true,
+      options: ["留言待医生回复","自动转其他在线医生","提示医生在线时间","仅按排班开放入口"] },
+  ]},
+  { title: "二十二、客户建档与通知（新增）", questions: [
+    { id: "q47", num: 47, type: "single", label: "客户是否需要注册并绑定手机号才能问诊？", required: true,
+      options: ["必须","可匿名先问","不需要"] },
+    { id: "q48", num: 48, type: "single", label: "是否支持一个账号下多宠物、家庭成员共享档案？", required: true,
+      options: ["都要","仅多宠物","仅家庭共享","不需要"] },
+    { id: "q49", num: 49, type: "multi", label: "客户收到医生回复的提醒方式？", required: true, options: [
+      "微信订阅消息","短信","站内消息","电话","不需要提醒" ]},
+    { id: "q50", num: 50, type: "single", label: "复诊提醒规则应由谁设定？", required: true,
+      options: ["医生按病例设定","系统按病种默认","客户自选","不需要复诊提醒"] },
+  ]},
+  { title: "二十三、到院闭环（新增）", questions: [
+    { id: "q51", num: 51, type: "single", label: "线上病例是否需要与院内系统（HIS / 电子病历）打通？", required: true,
+      options: ["需要打通","暂不打通，人工录入","后期再做","不需要"] },
+    { id: "q52", num: 52, type: "single", label: "到院就诊后，结果是否需要回写到宠物健康档案？", required: true,
+      options: ["需要自动回写","需要医生手动录入","不需要"] },
+  ]},
+  { title: "二十四、AI 辅助闭环（新增）", questions: [
+    { id: "q53", num: 53, type: "single", label: "AI 辅助结论是否需要医生一键采纳 / 驳回并反馈（用于改进）？", required: true,
+      options: ["需要","可选","不需要"] },
+  ]},
 ];
 
 const MAX_HINTS = { q29: "最多选 5 项", q30: "最多选 3 项" };
@@ -357,7 +409,7 @@ function validate(a) {
 /* ---------- 输出 ---------- */
 function toMarkdown(a) {
   const lines = [];
-  lines.push("# 宠物线上问诊小程序 · 医生需求确认表 V0.2");
+  lines.push("# 宠物线上问诊小程序 · 医生需求确认表 V0.3");
   lines.push("");
   lines.push("- 医生姓名：" + (a.doctor_name || ""));
   lines.push("- 所属医院 / 科室：" + (a.clinic || ""));
@@ -447,7 +499,7 @@ function fallbackCopy(text, done) {
 
 function onJson() {
   const a = collect();
-  const data = { form: "宠物线上问诊小程序-医生快速需求确认表-V0.2", submitted_at: new Date().toISOString(), answers: a };
+  const data = { form: "宠物线上问诊小程序-医生快速需求确认表-V0.3", submitted_at: new Date().toISOString(), answers: a };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
