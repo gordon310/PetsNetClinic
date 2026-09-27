@@ -19,7 +19,6 @@ import sys
 # 题号 -> 简短列名（导出 CSV 用）
 COLS = [
     ("doctor_name", "医生姓名"),
-    ("clinic", "医院/科室"),
     ("fill_date", "填写日期"),
     ("doctor_contact", "工号/联系方式"),
     ("q1", "1_可线上问"),
@@ -123,11 +122,10 @@ def parse_body(body):
                 answers[current].append(line.strip())
                 continue
         m4 = re.match(
-            r"^[-*]\s*(医生姓名|所属医院\s*/\s*科室|填写日期|工号\s*/\s*联系方式)[：:]\s*(.+)$", line)
+            r"^[-*]\s*(医生姓名|填写日期|工号\s*/\s*联系方式)[：:]\s*(.+)$", line)
         if m4:
             key = {
                 "医生姓名": "doctor_name",
-                "所属医院 / 科室": "clinic",
                 "填写日期": "fill_date",
                 "工号 / 联系方式": "doctor_contact",
             }[m4.group(1)]

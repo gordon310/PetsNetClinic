@@ -25,14 +25,6 @@ body:
       required: true
 
   - type: input
-    id: clinic
-    attributes:
-      label: 所属医院 / 科室
-      placeholder: 例：螃蟹树动物医院 内科
-    validations:
-      required: true
-
-  - type: input
     id: fill_date
     attributes:
       label: 填写日期

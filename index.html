@@ -131,7 +131,6 @@ const ISSUE_LABEL = "doctor-feedback";
 const SECTIONS = [
   { title: "填写人信息", questions: [
     { id: "doctor_name", type: "text", label: "医生姓名 / 昵称", required: true, placeholder: "例：张医生" },
-    { id: "clinic", type: "text", label: "所属医院 / 科室", required: true, placeholder: "例：螃蟹树动物医院 内科" },
     { id: "fill_date", type: "date", label: "填写日期", required: true },
     { id: "doctor_contact", type: "text", label: "工号 / 联系方式（选填）", required: false, placeholder: "用于同名区分，选填" },
   ]},
@@ -409,7 +408,6 @@ function toMarkdown(a) {
   lines.push("# 宠物线上问诊小程序 · 医生需求确认表 V0.3");
   lines.push("");
   lines.push("- 医生姓名：" + (a.doctor_name || ""));
-  lines.push("- 所属医院 / 科室：" + (a.clinic || ""));
   lines.push("- 填写日期：" + (a.fill_date || ""));
   lines.push("- 工号 / 联系方式：" + (a.doctor_contact || "（未填）"));
   lines.push("");
@@ -431,7 +429,7 @@ function toMarkdown(a) {
 }
 
 function issueUrl(a) {
-  const title = "[医生答卷] " + (a.doctor_name || "未署名") + " / " + (a.clinic || "") + " / " + (a.fill_date || "");
+  const title = "[医生答卷] " + (a.doctor_name || "未署名") + " / " + (a.fill_date || "");
   const body = toMarkdown(a);
   const base = "https://github.com/" + GITHUB_REPO + "/issues/new";
   const params = "title=" + encodeURIComponent(title) +

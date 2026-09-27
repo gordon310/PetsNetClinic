@@ -92,9 +92,9 @@ function parseBody(body) {
   const info = {}; const answers = {}; let cur = null;
   (body || "").split("\n").forEach(raw => {
     const line = raw.replace(/\s+$/, "");
-    const m4 = line.match(/^[-*]\s*(医生姓名|所属医院\s*\/\s*科室|填写日期|工号\s*\/\s*联系方式)[：:]\s*(.+)$/);
+    const m4 = line.match(/^[-*]\s*(医生姓名|填写日期|工号\s*\/\s*联系方式)[：:]\s*(.+)$/);
     if (m4) {
-      const key = { "医生姓名":"doctor_name", "所属医院 / 科室":"clinic", "填写日期":"fill_date", "工号 / 联系方式":"doctor_contact" }[m4[1]];
+      const key = { "医生姓名":"doctor_name", "填写日期":"fill_date", "工号 / 联系方式":"doctor_contact" }[m4[1]];
       info[key] = m4[2].trim();
       return;
     }
@@ -140,10 +140,9 @@ function renderSummary() {
   const groups = {};
   DATA.forEach(d => {
     const k = doctorKey(d);
-    if (!groups[k]) groups[k] = { name: k, clinic: "", contact: "", authors: new Set(), count: 0, latest: "" };
+    if (!groups[k]) groups[k] = { name: k, contact: "", authors: new Set(), count: 0, latest: "" };
     const g = groups[k];
     g.count++;
-    if (d.info.clinic && !g.clinic) g.clinic = d.info.clinic;
     if (d.info.doctor_contact && !g.contact) g.contact = d.info.doctor_contact;
     if (d.author) g.authors.add(d.author);
     if (d.created > g.latest) g.latest = d.created;
@@ -151,8 +150,8 @@ function renderSummary() {
   const rows = Object.values(groups).sort((a, b) => b.latest.localeCompare(a.latest));
   const el = document.getElementById("summary");
   if (!rows.length) { el.innerHTML = '<p class="muted">暂无提交。</p>'; return; }
-  el.innerHTML = '<table class="sum"><thead><tr><th>医生</th><th>医院/科室</th><th>工号/联系方式</th><th>GitHub 账号</th><th>提交次数</th><th>最近提交</th><th>状态</th></tr></thead><tbody>' +
-    rows.map(g => "<tr><td><b>" + esc(g.name) + "</b></td><td>" + esc(g.clinic || "–") + "</td><td>" + esc(g.contact || "–") +
+  el.innerHTML = '<table class="sum"><thead><tr><th>医生</th><th>工号/联系方式</th><th>GitHub 账号</th><th>提交次数</th><th>最近提交</th><th>状态</th></tr></thead><tbody>' +
+    rows.map(g => "<tr><td><b>" + esc(g.name) + "</b></td><td>" + esc(g.contact || "–") + "</td><td>" +
       "</td><td>" + esc(Array.from(g.authors).join(", ") || "–") + "</td><td>" + g.count + "</td><td>" +
       new Date(g.latest).toLocaleString("zh-CN", { hour12: false }) + "</td><td>" +
       (g.count > 1 ? '<span class="pill repeat">已更新 ' + g.count + " 次</span>" : '<span class="pill done">已完成</span>') +
@@ -165,7 +164,7 @@ function render() {
   const list = document.getElementById("list");
   const rows = DATA.filter(d => {
     if (!q) return true;
-    return (doctorKey(d) + " " + (d.info.clinic || "")).toLowerCase().includes(q);
+    return doctorKey(d).toLowerCase().includes(q);
   });
   const doctors = new Set(DATA.map(doctorKey));
   document.getElementById("s-total").textContent = DATA.length;
@@ -182,7 +181,6 @@ function render() {
     }).join("");
     return '<div class="card">' +
       '<div class="top"><div><span class="who">' + esc(doctorKey(d)) + '</span>' +
-      (d.info.clinic ? ' <span class="muted">· ' + esc(d.info.clinic) + "</span>" : "") +
       (d.state === "closed" ? '<span class="badge">已关闭</span>' : "") + "</div>" +
       '<div class="meta">填写日期 ' + esc(d.info.fill_date || "–") +
       (d.info.doctor_contact ? " · 工号/联系 " + esc(d.info.doctor_contact) : "") +
@@ -204,11 +202,11 @@ function render() {
 
 function toCSV() {
   const nums = Object.keys(QLABELS).sort((a, b) => a - b);
-  const header = ["issue", "链接", "医生姓名", "医院/科室", "填写日期", "工号/联系方式", "GitHub账号", "提交时间", "状态"].concat(nums.map(n => n + "_" + QLABELS[n]));
+  const header = ["issue", "链接", "医生姓名", "填写日期", "工号/联系方式", "GitHub账号", "提交时间", "状态"].concat(nums.map(n => n + "_" + QLABELS[n]));
   const escCsv = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
   const lines = [header.map(escCsv).join(",")];
   DATA.forEach(d => {
-    const base = [d.number, d.url, doctorKey(d), d.info.clinic || "", d.info.fill_date || "", d.info.doctor_contact || "", d.author, d.created, d.state];
+    const base = [d.number, d.url, doctorKey(d), d.info.fill_date || "", d.info.doctor_contact || "", d.author, d.created, d.state];
     const ans = nums.map(n => { const v = d.answers["q" + n]; return Array.isArray(v) ? v.join("；") : (v || ""); });
     lines.push(base.concat(ans).map(escCsv).join(","));
   });
