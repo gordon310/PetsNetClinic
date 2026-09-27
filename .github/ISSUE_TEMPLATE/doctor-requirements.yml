@@ -32,15 +32,6 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: doctor_contact
-    attributes:
-      label: 工号 / 联系方式（选填）
-      description: 选填。用于同名医生区分。
-      placeholder: 选填
-    validations:
-      required: false
-
   # ---------- 一、哪些问题适合先线上问诊 ----------
   - type: checkboxes
     id: q1

@@ -20,7 +20,6 @@ import sys
 COLS = [
     ("doctor_name", "医生姓名"),
     ("fill_date", "填写日期"),
-    ("doctor_contact", "工号/联系方式"),
     ("q1", "1_可线上问"),
     ("q2", "2_必须到院"),
     ("q3", "3_默认资料"),
@@ -122,12 +121,11 @@ def parse_body(body):
                 answers[current].append(line.strip())
                 continue
         m4 = re.match(
-            r"^[-*]\s*(医生姓名|填写日期|工号\s*/\s*联系方式)[：:]\s*(.+)$", line)
+            r"^[-*]\s*(医生姓名|填写日期)[：:]\s*(.+)$", line)
         if m4:
             key = {
                 "医生姓名": "doctor_name",
                 "填写日期": "fill_date",
-                "工号 / 联系方式": "doctor_contact",
             }[m4.group(1)]
             answers[key] = m4.group(2).strip()
     for k, v in answers.items():
