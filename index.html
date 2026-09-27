@@ -433,14 +433,16 @@ function toMarkdown(a) {
   lines.push("");
   SECTIONS.forEach(sec => {
     sec.questions.filter(q => q.id.startsWith("q")).forEach(q => {
-      lines.push("**" + q.num + ". " + q.label + "**");
+      const v = a[q.id];
       if (q.type === "multi") {
-        const sel = a[q.id] || [];
-        (sel.length ? sel : ["（未选择）"]).forEach(o => lines.push("- " + o));
-      } else if (q.type === "single") {
-        lines.push("- " + (a[q.id] || "（未回答）"));
+        const sel = v || [];
+        if (!sel.length) return;
+        lines.push("**" + q.num + ". " + q.label + "**");
+        sel.forEach(o => lines.push("- " + o));
       } else {
-        lines.push(a[q.id] || "（未填写）");
+        if (!v) return;
+        lines.push("**" + q.num + ". " + q.label + "**");
+        lines.push(q.type === "single" ? ("- " + v) : v);
       }
       lines.push("");
     });
@@ -480,7 +482,7 @@ function onSubmit() {
   }
   if (RELAY_URL) { submitViaRelay(a); return; }
   const url = issueUrl(a);
-  if (url.length <= 8000) {
+  if (url.length <= 30000) {
     setStatus("已在新标签页打开 GitHub 提交页，请检查后点击 Submit new issue。", "ok");
     window.open(url, "_blank", "noopener");
     return;
