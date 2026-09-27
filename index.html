@@ -137,6 +137,7 @@ const SECTIONS = [
     { id: "doctor_name", type: "text", label: "医生姓名 / 昵称", required: true, placeholder: "例：张医生" },
     { id: "clinic", type: "text", label: "所属医院 / 科室", required: true, placeholder: "例：螃蟹树动物医院 内科" },
     { id: "fill_date", type: "date", label: "填写日期", required: true },
+    { id: "doctor_contact", type: "text", label: "工号 / 联系方式（选填）", required: false, placeholder: "用于同名区分，选填" },
   ]},
   { title: "一、哪些问题适合先线上问诊？", questions: [
     { id: "q1", num: 1, type: "multi", label: "以下哪些情况适合先进行线上咨询？", required: true, options: [
@@ -414,6 +415,7 @@ function toMarkdown(a) {
   lines.push("- 医生姓名：" + (a.doctor_name || ""));
   lines.push("- 所属医院 / 科室：" + (a.clinic || ""));
   lines.push("- 填写日期：" + (a.fill_date || ""));
+  lines.push("- 工号 / 联系方式：" + (a.doctor_contact || "（未填）"));
   lines.push("");
   lines.push("---");
   SECTIONS.forEach(sec => {

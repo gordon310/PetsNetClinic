@@ -11,6 +11,7 @@ body:
         本表用于确认：① 什么可以线上问 ② 什么必须到医院 ③ AI 可以/不可以做什么 ④ 医生希望系统怎样提高效率。
 
         > 提交后请勿删除本 Issue —— 它会被用作需求留档与开发文档回填依据。
+        > 姓名必填，用于识别是哪位医生提交；同一医生可多次提交（如修订版），每次都会单独留档，以最新一份为准。
         > 共 53 题。标记「可多选」的题目可勾选多项；第 29 题请选 5 项，第 30 题最多选 3 项。
         > 第 34–53 题为 V0.3 新增（影像/视频 AI、安全兜底、交互与介入、建档通知、到院闭环、AI 闭环）。
 
@@ -18,6 +19,7 @@ body:
     id: doctor_name
     attributes:
       label: 医生姓名 / 昵称
+      description: 必填。用于识别是哪位医生提交；建议同步写入 Issue 标题。
       placeholder: 例：张医生
     validations:
       required: true
@@ -37,6 +39,15 @@ body:
       placeholder: 例：2026-09-27
     validations:
       required: true
+
+  - type: input
+    id: doctor_contact
+    attributes:
+      label: 工号 / 联系方式（选填）
+      description: 选填。用于同名医生区分。
+      placeholder: 选填
+    validations:
+      required: false
 
   # ---------- 一、哪些问题适合先线上问诊 ----------
   - type: checkboxes

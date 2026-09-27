@@ -21,6 +21,7 @@ COLS = [
     ("doctor_name", "医生姓名"),
     ("clinic", "医院/科室"),
     ("fill_date", "填写日期"),
+    ("doctor_contact", "工号/联系方式"),
     ("q1", "1_可线上问"),
     ("q2", "2_必须到院"),
     ("q3", "3_默认资料"),
@@ -121,9 +122,15 @@ def parse_body(body):
             if line and not re.match(r"^(#|>|---|\*\*)", line):
                 answers[current].append(line.strip())
                 continue
-        m4 = re.match(r"^[-*]\s*(医生姓名|所属医院\s*/\s*科室|填写日期)[：:]\s*(.+)$", line)
+        m4 = re.match(
+            r"^[-*]\s*(医生姓名|所属医院\s*/\s*科室|填写日期|工号\s*/\s*联系方式)[：:]\s*(.+)$", line)
         if m4:
-            key = {"医生姓名": "doctor_name", "所属医院 / 科室": "clinic", "填写日期": "fill_date"}[m4.group(1)]
+            key = {
+                "医生姓名": "doctor_name",
+                "所属医院 / 科室": "clinic",
+                "填写日期": "fill_date",
+                "工号 / 联系方式": "doctor_contact",
+            }[m4.group(1)]
             answers[key] = m4.group(2).strip()
     for k, v in answers.items():
         if isinstance(v, list):
