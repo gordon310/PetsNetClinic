@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>宠物线上问诊小程序 · 医生快速需求确认表 V0.2</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #2563eb;
+    --accent-ink: #ffffff;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --err: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 120px; }
+  header.page {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff; border-radius: 16px; padding: 28px 24px; margin-bottom: 20px;
+  }
+  header.page h1 { margin: 0 0 6px; font-size: 22px; }
+  header.page p { margin: 4px 0; opacity: .92; font-size: 14px; }
+  .four { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 14px; }
+  .four span { background: rgba(255,255,255,.16); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+  section.card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  section.card > h2 {
+    font-size: 16px; margin: 0 0 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line); color: #111827;
+  }
+  .q { margin-bottom: 22px; }
+  .q:last-child { margin-bottom: 0; }
+  .q .title { font-weight: 600; margin-bottom: 4px; }
+  .q .desc { color: var(--muted); font-size: 13px; margin-bottom: 8px; white-space: pre-line; }
+  .q .req { color: var(--err); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  .q .hint { color: var(--warn); font-size: 12px; margin-left: 6px; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+  label.opt {
+    display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px;
+    border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font-size: 14px;
+    transition: border-color .15s, background .15s;
+  }
+  label.opt:hover { border-color: var(--accent); background: #f8faff; }
+  label.opt input { margin-top: 3px; accent-color: var(--accent); }
+  label.opt.checked { border-color: var(--accent); background: #eff6ff; }
+  input[type="text"], input[type="date"], textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line);
+    border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff;
+  }
+  input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px #dbeafe;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-grid .full { grid-column: 1 / -1; }
+  .info-grid label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.96);
+    border-top: 1px solid var(--line); padding: 12px 16px; display: flex; gap: 10px;
+    justify-content: center; flex-wrap: wrap; backdrop-filter: blur(6px); z-index: 20;
+  }
+  button {
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 10px 16px; border-radius: 9px; font-size: 14px; cursor: pointer;
+    font-family: inherit; transition: background .15s, border-color .15s;
+  }
+  button:hover { background: #f3f4f6; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button.primary:hover { background: #1d4ed8; }
+  #status { text-align: center; font-size: 13px; margin-top: 10px; min-height: 20px; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--err); }
+  footer.note { color: var(--muted); font-size: 12px; text-align: center; margin-top: 18px; }
+  @media (max-width: 560px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .four { grid-template-columns: 1fr; }
+  }
+  @media print {
+    body { background: #fff; }
+    .bar, footer.note { display: none; }
+    section.card { box-shadow: none; break-inside: avoid; }
+    header.page { background: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <h1>宠物线上问诊小程序 · 医生快速需求确认表 V0.2</h1>
+    <p>填写时间：约 5–8 分钟</p>
+    <p>本表用于确认线上问诊的实际流程、风险边界及医生工作方式。带 <span style="color:#fca5a5">*</span> 为必填。</p>
+    <div class="four">
+      <span>① 什么可以线上问</span>
+      <span>② 什么必须到医院</span>
+      <span>③ AI 可以/不可以做什么</span>
+      <span>④ 医生希望系统怎样提高效率</span>
+    </div>
+  </header>
+
+  <form id="form" novalidate></form>
+  <div id="status" role="status" aria-live="polite"></div>
+  <footer class="note">提交后答案会以 GitHub Issue 形式留档；也可导出 JSON / 打印为 PDF 自行保存。</footer>
+</div>
+
+<div class="bar">
+  <button type="button" class="primary" id="btn-submit">提交到 GitHub</button>
+  <button type="button" id="btn-md">复制 Markdown</button>
+  <button type="button" id="btn-json">导出 JSON</button>
+  <button type="button" id="btn-print">打印 / PDF</button>
+  <button type="button" id="btn-reset">清空</button>
+</div>
+
+<script>
+/* ============================================================
+   把下面这行改成你的 GitHub 用户名 / 仓库名（创建仓库后修改）
+   ============================================================ */
+const GITHUB_REPO = "gordon310/PetsNetClinic";
+const ISSUE_LABEL = "doctor-feedback";
+
+/* ---------- 问卷数据模型（与 questionnaire.md 保持一致） ---------- */
+const SECTIONS = [
+  { title: "填写人信息", questions: [
+    { id: "doctor_name", type: "text", label: "医生姓名 / 昵称", required: true, placeholder: "例：张医生" },
+    { id: "clinic", type: "text", label: "所属医院 / 科室", required: true, placeholder: "例：螃蟹树动物医院 内科" },
+    { id: "fill_date", type: "date", label: "填写日期", required: true },
+  ]},
+  { title: "一、哪些问题适合先线上问诊？", questions: [
+    { id: "q1", num: 1, type: "multi", label: "以下哪些情况适合先进行线上咨询？", required: true, options: [
+      "呕吐","腹泻","食欲下降","精神状态差","皮肤红肿 / 掉毛 / 瘙痒","眼睛异常","耳朵异常",
+      "咳嗽 / 打喷嚏","跛行 / 走路异常","轻微外伤","排尿异常","排便异常","术后恢复咨询",
+      "用药后情况咨询","疫苗 / 驱虫咨询","幼犬 / 幼猫健康咨询","老年宠物健康咨询",
+      "基本都可以先线上初步判断" ]},
+  ]},
+  { title: "二、哪些情况应直接建议到院？", questions: [
+    { id: "q2", num: 2, type: "multi", label: "以下哪些情况建议直接到院？", required: true, options: [
+      "呼吸困难","大量出血","意识异常","抽搐","无法站立","严重外伤","疑似中毒","持续频繁呕吐",
+      "呕吐或排泄物带血","长时间无法排尿","明显腹部疼痛","高热","幼龄宠物精神状态极差",
+      "误食异物","其他严重异常" ]},
+  ]},
+  { title: "三、每次线上问诊需要哪些基础资料？", questions: [
+    { id: "q3", num: 3, type: "multi", label: "建议系统默认保存哪些宠物信息？", required: true, options: [
+      "猫 / 狗","品种","年龄","性别","是否绝育","体重","疫苗情况","驱虫情况","既往病史",
+      "正在服用的药物","过敏史","以上基本都需要" ]},
+  ]},
+  { title: "四、AI 应该自动询问哪些问题？", questions: [
+    { id: "q4", num: 4, type: "multi", label: "当宠物生病时，以下哪些问题建议系统自动询问？", required: true, options: [
+      "什么时候开始出现症状","症状持续多久","一天发生几次","食欲情况","饮水情况","精神状态",
+      "是否呕吐","是否腹泻","排尿情况","排便情况","是否疼痛","是否可能误食","是否有外伤",
+      "最近是否换粮","最近是否打疫苗","最近是否驱虫","基本都需要" ]},
+  ]},
+  { title: "五、是否需要根据不同症状自动追问？", questions: [
+    { id: "q5", num: 5, type: "single", label: "是否希望系统根据客户描述自动进入不同问诊流程？", required: true,
+      desc: "例如客户输入「狗狗一直吐」，系统自动进入「呕吐问诊」。",
+      options: ["非常需要","可以有","暂时不需要"] },
+    { id: "q6", num: 6, type: "multi", label: "以下哪些症状应该建立专门问诊流程？", required: true, options: [
+      "呕吐","腹泻","皮肤问题","眼睛问题","耳朵问题","呼吸 / 咳嗽","排尿异常","排便异常",
+      "跛行","外伤","食欲下降","精神异常","误食 / 中毒","术后恢复" ]},
+  ]},
+  { title: "六、图片和视频", questions: [
+    { id: "q7", num: 7, type: "multi", label: "哪些情况建议客户上传照片？", required: true, options: [
+      "皮肤问题","眼睛","耳朵","牙齿","外伤","肿块","呕吐物","排泄物","药品照片","检查报告" ]},
+    { id: "q8", num: 8, type: "multi", label: "哪些情况建议客户上传视频？", required: true, options: [
+      "跛行 / 走路异常","呼吸异常","咳嗽","抽搐","异常行为","精神状态异常","疼痛反应" ]},
+  ]},
+  { title: "七、风险分级", questions: [
+    { id: "q9", num: 9, type: "single", label: "是否同意线上问诊采用三级风险分类？", required: true,
+      desc: "绿色：可先观察或进行一般健康建议。\n黄色：需要宠物医生进一步线上判断。\n红色：建议尽快到医院。",
+      options: ["同意","基本同意，需要调整","不建议这样分类"] },
+  ]},
+  { title: "八、AI 可以做什么？", questions: [
+    { id: "q10", num: 10, type: "single", label: "AI 是否可以自动整理客户描述，生成病情摘要？", required: true,
+      desc: "例如：「昨天开始没吃东西，今天吐了两次。」→ 症状开始=昨天；食欲下降；呕吐 2 次。",
+      options: ["可以","不建议"] },
+    { id: "q11", num: 11, type: "single", label: "AI 是否可以根据当前信息继续自动追问？", required: true,
+      options: ["可以","可以，但需要医生设定规则","不建议"] },
+    { id: "q12", num: 12, type: "single", label: "AI 发现危险症状时，是否可以直接提醒客户尽快到院？", required: true,
+      options: ["可以","必须经过医生确认","不建议"] },
+    { id: "q13", num: 13, type: "single", label: "AI 是否可以在医生后台提供辅助判断？", required: true,
+      desc: "例如：「建议重点确认是否存在误食、脱水等情况。」",
+      options: ["可以","可以，仅供医生参考","不建议"] },
+  ]},
+  { title: "九、AI 不能做什么？", questions: [
+    { id: "q14", num: 14, type: "single", label: "AI 是否可以直接告诉客户具体疾病名称？", required: true,
+      options: ["不可以，只能说「可能存在某类问题」","可以提示可能性，但必须注明不能替代医生诊断","可以直接给出初步诊断"] },
+    { id: "q15", num: 15, type: "single", label: "AI 是否可以直接推荐药物？", required: true,
+      options: ["不可以","只能介绍常规护理方法","可以推荐非处方产品","必须经过医生确认后才能推荐"] },
+    { id: "q16", num: 16, type: "single", label: "AI 是否可以直接告诉客户用药剂量？", required: true,
+      options: ["不可以","必须经过医生确认","可以在已有医生处方基础上提醒"] },
+  ]},
+  { title: "十、医生接诊页面", questions: [
+    { id: "q17", num: 17, type: "multi", label: "医生打开一个线上病例时，希望首先看到哪些内容？", required: true, options: [
+      "宠物基本资料","本次主要症状","AI 病情摘要","症状开始时间","风险等级","客户原始聊天记录",
+      "图片","视频","历史疾病","历史问诊记录","历史用药记录" ]},
+    { id: "q18", num: 18, type: "single", label: "医生是否需要直接在系统里继续向客户提问？", required: true,
+      options: ["必须需要","最好有","不需要"] },
+  ]},
+  { title: "十一、医生处理结果", questions: [
+    { id: "q19", num: 19, type: "multi", label: "医生结束一次线上问诊时，建议有哪些快捷选项？", required: true, options: [
+      "暂时观察","建议复诊","建议尽快到院","建议检查","建议继续补充照片 / 视频","提供护理建议",
+      "提供用药建议","转其他医生","预约到院" ]},
+  ]},
+  { title: "十二、到院转化", questions: [
+    { id: "q20", num: 20, type: "single", label: "如果医生建议到院，系统是否应该直接提供预约？", required: true,
+      options: ["是","可以后续再做","不需要"] },
+    { id: "q21", num: 21, type: "multi", label: "预约时是否需要选择以下内容？", required: true, options: [
+      "到院时间","医生","科室","检查项目","不需要客户选择，由医院安排" ]},
+  ]},
+  { title: "十三、宠物健康档案", questions: [
+    { id: "q22", num: 22, type: "multi", label: "以下哪些内容建议长期保存在宠物档案中？", required: true, options: [
+      "基础资料","疫苗记录","驱虫记录","既往疾病","过敏史","历史用药","线上问诊记录",
+      "到院就诊记录","检查报告","X 光等影像","手术记录","住院记录","体重变化" ]},
+  ]},
+  { title: "十四、医院知识库", questions: [
+    { id: "q23", num: 23, type: "multi", label: "医院目前是否有以下资料？", required: true, options: [
+      "常见疾病资料","医生培训资料","标准问诊流程","标准诊疗流程","客户宣教资料","术后注意事项",
+      "疫苗 / 驱虫资料","典型病例","历史病例","目前资料比较零散" ]},
+    { id: "q24", num: 24, type: "single", label: "是否同意把典型病例整理进入医院知识库？", required: true,
+      desc: "内容包括：症状 → 问诊 → 检查 → 最终诊断 → 治疗结果",
+      options: ["同意","同意，但需要脱敏","暂不考虑"] },
+    { id: "q25", num: 25, type: "single", label: "AI 整理出来的知识是否需要医生审核后才能正式进入知识库？", required: true,
+      options: ["必须审核","重要内容审核","不需要全部审核"] },
+  ]},
+  { title: "十五、线上问诊运营方式", questions: [
+    { id: "q26", num: 26, type: "single", label: "线上问诊建议采用哪种模式？", required: true,
+      options: ["全部免费","前期免费","普通咨询免费，医生问诊收费","会员免费","全部收费","暂未确定"] },
+    { id: "q27", num: 27, type: "single", label: "医生是否需要线上排班？", required: true,
+      options: ["需要","暂时不需要","后期根据问诊量决定"] },
+    { id: "q28", num: 28, type: "single", label: "客户提交问诊后，理想回复时间是：", required: true,
+      options: ["10 分钟以内","30 分钟以内","1 小时以内","2 小时以内","当天回复即可","按医生在线时间回复"] },
+  ]},
+  { title: "十六、第一阶段最重要的功能", questions: [
+    { id: "q29", num: 29, type: "multi", max: 5, label: "请选出您认为最重要的 5 项。", required: true, options: [
+      "AI 聊天式问诊","自动追问","图片上传","视频上传","AI 病情摘要","风险分级","医生在线回复",
+      "宠物健康档案","历史病例查看","到院预约","医疗知识库","AI 医生助手","复诊提醒" ]},
+  ]},
+  { title: "十七、医生最希望系统优先解决什么？", questions: [
+    { id: "q30", num: 30, type: "multi", max: 3, label: "最希望系统减少哪类工作？", required: true, options: [
+      "重复回答相同问题","反复询问基础资料","客户描述不清楚","客户发很多微信，需要人工整理",
+      "判断哪些客户需要尽快到院","查询历史病例","术后回访","预约沟通","医疗知识查找","暂时没有明显痛点" ]},
+  ]},
+  { title: "十八、整体意见", questions: [
+    { id: "q31", num: 31, type: "single", label: "您认为线上问诊系统对于医院是否有实际价值？", required: true,
+      options: ["非常有价值","有一定价值","需要试运行后判断","价值不大"] },
+    { id: "q32", num: 32, type: "single", label: "您是否愿意参与后续测试？", required: true,
+      options: ["愿意","可以偶尔参与","暂时不参与"] },
+    { id: "q33", num: 33, type: "text", label: "如有特别重要的问题，可补充一句：", required: false, placeholder: "选填" },
+  ]},
+];
+
+const MAX_HINTS = { q29: "最多选 5 项", q30: "最多选 3 项" };
+
+/* ---------- 渲染 ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function buildQuestion(q) {
+  const hint = q.max ? '<span class="hint">' + MAX_HINTS[q.id] + "</span>" : "";
+  const req = q.required ? '<span class="req">*</span>' : "";
+  const title = '<div class="title">' + (q.num ? q.num + ". " : "") + esc(q.label) + req + hint + "</div>";
+  const desc = q.desc ? '<div class="desc">' + esc(q.desc) + "</div>" : "";
+
+  if (q.type === "text" || q.type === "date") {
+    return '<div class="q" data-qid="' + q.id + '">' + title +
+      '<input type="' + q.type + '" id="' + q.id + '" name="' + q.id + '"' +
+      (q.type === "text" ? ' placeholder="' + esc(q.placeholder || "") + '"' : "") + " /></div>";
+  }
+
+  const inputType = q.type === "multi" ? "checkbox" : "radio";
+  const opts = q.options.map((o, i) => {
+    const oid = q.id + "_" + i;
+    return '<label class="opt" for="' + oid + '">' +
+      '<input type="' + inputType + '" id="' + oid + '" name="' + q.id + '" value="' + esc(o) + '" />' +
+      "<span>" + esc(o) + "</span></label>";
+  }).join("");
+  return '<div class="q" data-qid="' + q.id + '">' + title + desc +
+    '<div class="opts">' + opts + "</div></div>";
+}
+
+function render() {
+  const form = document.getElementById("form");
+  form.innerHTML = SECTIONS.map(sec =>
+    '<section class="card"><h2>' + esc(sec.title) + "</h2>" +
+    sec.questions.map(buildQuestion).join("") + "</section>"
+  ).join("");
+
+  const d = new Date();
+  const today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const dateEl = document.getElementById("fill_date");
+  if (dateEl) dateEl.value = today;
+
+  form.addEventListener("change", onChange);
+}
+
+function onChange(e) {
+  const el = e.target;
+  if (el.type === "checkbox" || el.type === "radio") {
+    const wrap = el.closest(".q");
+    const qid = wrap.dataset.qid;
+    const max = (SECTIONS.flatMap(s => s.questions).find(q => q.id === qid) || {}).max;
+    if (el.type === "checkbox" && max) {
+      const checked = wrap.querySelectorAll('input[type="checkbox"]:checked');
+      if (checked.length > max) {
+        el.checked = false;
+        setStatus("「" + (MAX_HINTS[qid] || ("最多选 " + max + " 项")) + "」，已取消多出的选择。", "err");
+      }
+    }
+    wrap.querySelectorAll("label.opt").forEach(lbl => {
+      const inp = lbl.querySelector("input");
+      lbl.classList.toggle("checked", inp.checked);
+    });
+  }
+}
+
+/* ---------- 收集 ---------- */
+function collect() {
+  const answers = {};
+  SECTIONS.flatMap(s => s.questions).forEach(q => {
+    if (q.type === "multi") {
+      answers[q.id] = Array.from(document.querySelectorAll('input[name="' + q.id + '"]:checked')).map(i => i.value);
+    } else if (q.type === "single") {
+      const c = document.querySelector('input[name="' + q.id + '"]:checked');
+      answers[q.id] = c ? c.value : "";
+    } else {
+      const el = document.getElementById(q.id);
+      answers[q.id] = el ? el.value.trim() : "";
+    }
+  });
+  return answers;
+}
+
+function validate(a) {
+  const missing = [];
+  SECTIONS.flatMap(s => s.questions).forEach(q => {
+    if (!q.required) return;
+    const v = a[q.id];
+    const empty = Array.isArray(v) ? v.length === 0 : !v;
+    if (empty) missing.push((q.num ? q.num + ". " : "") + q.label);
+  });
+  return missing;
+}
+
+/* ---------- 输出 ---------- */
+function toMarkdown(a) {
+  const lines = [];
+  lines.push("# 宠物线上问诊小程序 · 医生需求确认表 V0.2");
+  lines.push("");
+  lines.push("- 医生姓名：" + (a.doctor_name || ""));
+  lines.push("- 所属医院 / 科室：" + (a.clinic || ""));
+  lines.push("- 填写日期：" + (a.fill_date || ""));
+  lines.push("");
+  lines.push("---");
+  SECTIONS.forEach(sec => {
+    const qs = sec.questions.filter(q => q.id.startsWith("q"));
+    if (!qs.length) return;
+    lines.push("");
+    lines.push("## " + sec.title);
+    qs.forEach(q => {
+      lines.push("");
+      if (q.type === "multi") {
+        lines.push("**" + q.num + ". " + q.label + "**");
+        const sel = a[q.id] || [];
+        q.options.forEach(o => lines.push("- [" + (sel.includes(o) ? "x" : " ") + "] " + o));
+      } else if (q.type === "single") {
+        lines.push("**" + q.num + ". " + q.label + "**");
+        lines.push("");
+        lines.push("- " + (a[q.id] || "（未回答）"));
+      } else {
+        lines.push("**" + q.num + ". " + q.label + "**");
+        lines.push("");
+        lines.push(a[q.id] || "（未填写）");
+      }
+    });
+  });
+  lines.push("");
+  return lines.join("\n");
+}
+
+function issueUrl(a) {
+  const title = "[医生答卷] " + (a.doctor_name || "未署名") + " / " + (a.clinic || "") + " / " + (a.fill_date || "");
+  const body = toMarkdown(a);
+  const base = "https://github.com/" + GITHUB_REPO + "/issues/new";
+  const params = "title=" + encodeURIComponent(title) +
+    "&body=" + encodeURIComponent(body) +
+    "&labels=" + encodeURIComponent(ISSUE_LABEL);
+  return base + "?" + params;
+}
+
+function setStatus(msg, kind) {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = kind || "";
+}
+
+/* ---------- 事件 ---------- */
+function onSubmit() {
+  const a = collect();
+  const missing = validate(a);
+  if (missing.length) {
+    setStatus("还有 " + missing.length + " 项必填未完成，例如：" + missing.slice(0, 3).join("；"), "err");
+    const first = document.querySelector('[data-qid="' + (missing[0].match(/^(\d+)\./) ? "q" + RegExp.$1 : "doctor_name") + '"]');
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  const url = issueUrl(a);
+  if (url.length > 7500) {
+    setStatus("内容较长，已打开 GitHub 页面；若标题/正文未自动填入，请改用「复制 Markdown」粘贴。", "err");
+  } else {
+    setStatus("已在新标签页打开 GitHub 提交页，请检查后点击 Submit new issue。", "ok");
+  }
+  window.open(url, "_blank", "noopener");
+}
+
+function onCopyMd() {
+  const md = toMarkdown(collect());
+  const done = () => setStatus("已复制 Markdown，可粘贴到 GitHub Issue 或文档中。", "ok");
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(md).then(done, () => fallbackCopy(md, done));
+  } else {
+    fallbackCopy(md, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); done(); }
+  catch (e) { setStatus("复制失败，请手动选择文本。", "err"); }
+  document.body.removeChild(ta);
+}
+
+function onJson() {
+  const a = collect();
+  const data = { form: "宠物线上问诊小程序-医生快速需求确认表-V0.2", submitted_at: new Date().toISOString(), answers: a };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "医生需求确认表_" + (a.doctor_name || "未署名") + "_" + (a.fill_date || "") + ".json";
+  link.click();
+  URL.revokeObjectURL(url);
+  setStatus("已导出 JSON 文件。", "ok");
+}
+
+function onReset() {
+  if (!confirm("确定清空所有已填写内容？")) return;
+  document.getElementById("form").reset();
+  document.querySelectorAll("label.opt.checked").forEach(l => l.classList.remove("checked"));
+  setStatus("已清空。", "");
+}
+
+render();
+document.getElementById("btn-submit").addEventListener("click", onSubmit);
+document.getElementById("btn-md").addEventListener("click", onCopyMd);
+document.getElementById("btn-json").addEventListener("click", onJson);
+document.getElementById("btn-print").addEventListener("click", () => window.print());
+document.getElementById("btn-reset").addEventListener("click", onReset);
+</script>
+</body>
+</html>
