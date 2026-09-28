@@ -207,7 +207,7 @@ function render() {
       " · GitHub @" + esc(d.author) + " · 提交 " + new Date(d.created).toLocaleString("zh-CN", { hour12: false }) +
       ' · <a href="' + d.url + '" target="_blank" rel="noopener">打开 Issue #' + d.number + "</a></div></div>" +
       '<div class="toggle"><button type="button" data-toggle="' + d.number + '">查看答卷</button>' +
-      '<button type="button" class="del" data-del="' + d.number + '">删除</button></div>' +
+      '<button type="button" class="del" data-del="' + d.number + '">' + (RELAY_URL ? "删除" : "去 GitHub 删除") + '</button></div>' +
       '<div class="qa" id="qa-' + d.number + '">' + qas + "</div>" +
       "</div>";
   }).join("");
@@ -233,7 +233,6 @@ function setStatusText(msg) {
 async function deleteRecord(number, btn) {
   const rec = DATA.find(x => x.number === number);
   if (!RELAY_URL) {
-    alert("未配置中转服务，无法在线删除。\n可在 GitHub Issues 中删除 #" + number + "。");
     if (rec) window.open(rec.url, "_blank", "noopener");
     return;
   }
