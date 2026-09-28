@@ -42,16 +42,34 @@ export default {
       if (!env.GITHUB_REPO || !env.GITHUB_TOKEN) {
         return jsonResponse({ error: "server not configured" }, 500, cors);
       }
-      const del = await fetch("https://api.github.com/repos/" + env.GITHUB_REPO + "/issues/" + number, {
-        method: "DELETE",
-        headers: {
-          Authorization: "Bearer " + env.GITHUB_TOKEN,
-          Accept: "application/vnd.github+json",
-          "User-Agent": "petsnetclinic-relay",
-        },
+      // 注：REST DELETE /issues/{n} 在本项目实测恒返回 404（即使管理员 token），
+      //     故先取 node_id，再走 GraphQL deleteIssue（已验证可用）。
+      const ghHeaders = {
+        Authorization: "Bearer " + env.GITHUB_TOKEN,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "petsnetclinic-relay",
+      };
+      const info = await fetch("https://api.github.com/repos/" + env.GITHUB_REPO + "/issues/" + number, { headers: ghHeaders });
+      if (info.status === 404 || info.status === 410) {
+        return jsonResponse({ ok: true, deleted: number, already: true }, 200, cors);
+      }
+      if (!info.ok) return jsonResponse({ error: "github_error", status: info.status }, 502, cors);
+      const nodeId = (await info.json()).node_id;
+      if (!nodeId) return jsonResponse({ error: "github_error", detail: "no node_id" }, 502, cors);
+
+      const gql = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        headers: Object.assign({}, ghHeaders, { "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          query: "mutation($id: ID!) { deleteIssue(input: { issueId: $id }) { clientMutationId } }",
+          variables: { id: nodeId },
+        }),
       });
-      if (del.status === 204) return jsonResponse({ ok: true, deleted: number }, 200, cors);
-      return jsonResponse({ error: "github_error", status: del.status }, 502, cors);
+      const gj = await gql.json().catch(() => ({}));
+      if (gql.ok && gj && gj.data && gj.data.deleteIssue) {
+        return jsonResponse({ ok: true, deleted: number }, 200, cors);
+      }
+      return jsonResponse({ error: "github_error", status: gql.status, detail: gj && gj.errors ? gj.errors : null }, 502, cors);
     }
 
     // 创建记录（可用 FORM_KEY 口令）

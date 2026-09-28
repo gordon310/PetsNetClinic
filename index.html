@@ -143,11 +143,9 @@
 const GITHUB_REPO = "gordon310/PetsNetClinic";
 const ISSUE_LABEL = "doctor-feedback";
 
-/* 中转服务地址：部署 relay/ 后填入，例如
-   "https://petsnetclinic-relay.<你的子域>.workers.dev/"
-   留空则回退为“打开 GitHub 提交页”的旧流程。 */
-const RELAY_URL = "";
-const FORM_KEY = ""; // 与 Worker 的 FORM_KEY 一致（可选）
+/* 中转服务地址：留空则回退为“打开 GitHub 提交页”的旧流程。 */
+const RELAY_URL = "https://petsnetclinic-relay.zoubeacon.com/";
+const FORM_KEY = "WD2U2gwhW2aXcP34H5ZomOEuK-P_jPpo"; // 与 Worker 的 FORM_KEY 一致
 
 /* ---------- 问卷数据模型（与 questionnaire.md 保持一致） ---------- */
 const SECTIONS = [

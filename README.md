@@ -38,25 +38,28 @@ PetsNetClinic/
 - 仓库：https://github.com/gordon310/PetsNetClinic
 - **医生填写页（单按钮提交）**：https://gordon310.github.io/PetsNetClinic/
 - **答卷记录页（内部查看完成情况）**：https://gordon310.github.io/PetsNetClinic/records.html
-  （每条记录可「删除」，需管理员口令并经中转服务；未部署中转时可回退到 GitHub 手动删除）
+  （每条记录可「删除」，经中转服务调 GitHub API，需管理员口令）
 - 医生提交入口（Issue 表单，备用）：https://github.com/gordon310/PetsNetClinic/issues/new/choose
 - 建议在仓库 `Settings → Labels` 保持 `doctor-feedback` 标签存在，便于筛选导出。
 
 > 记录页会展示每位医生的提交次数、最近提交时间与状态，并支持按姓名过滤、导出 CSV。
 
-### 提交方式（两种）
+### 提交方式
 
-- **默认（未部署中转）**：点「提交」会打开 GitHub 新建 Issue 页，医生需登录 GitHub 并点一次 Submit。
-- **推荐（部署中转后）**：点「提交」→ 数据由中转服务写入 Issue → 页面显示「谢谢」，医生直接关闭浏览器，全程不接触 GitHub。
-  部署见 `relay/README.md`，完成后在 `index.html` 填入 `RELAY_URL` 与 `FORM_KEY` 即可切换。
+- **当前**：打开填写页点「提交」→ Cloudflare Worker 中转写入 GitHub Issue → 页面显示「感谢上传」，医生直接关闭浏览器，全程不接触 GitHub。
+  中转地址 `https://petsnetclinic-relay.zoubeacon.com/`，配置项在 `index.html`（`RELAY_URL`、`FORM_KEY`）与 `records.html`（`RELAY_URL`）。
+- **回退**：把 `RELAY_URL` 留空即回到「打开 GitHub 新建 Issue 页」的旧流程，医生需登录 GitHub 点一次 Submit。
+
+> `workers.dev` 在大陆被墙，中转绑定自有域名 `zoubeacon.com`；换域名改 `relay/wrangler.toml` 的 `[[routes]]` 后重新 `wrangler deploy`。
 
 ## 医生如何填写
 
-1. 打开仓库 → `Issues` → `New issue` → 选择「医生需求确认表 V0.3」。
-2. 逐项勾选 / 选择，第 33 题可补充。
-3. 点击 `Submit new issue`。提交后请勿删除，作为需求留档。
+1. 打开 `https://gordon310.github.io/PetsNetClinic/`（共 53 题，单按钮提交）。
+2. 填写姓名与日期，逐项作答，第 33 题可补充。
+3. 点「提交」，看到「感谢上传」即完成，可直接关闭浏览器。
+4. 提交后请勿删除，作为需求留档。
 
-> GitHub Issue 表单无法强制"最多选 N 项"，第 29 / 30 题请在题干提示下自行控制；HTML 版会强制限制。
+> GitHub Issue 表单（`issues/new/choose`）无法强制"最多选 N 项"，第 29 / 30 题请在题干提示下自行控制；HTML 版会强制限制。
 
 ### 医生身份与多次提交
 

@@ -9,38 +9,40 @@
 3. Permissions → Repository permissions → **Issues: Read and write**。
 4. 生成后复制 token（形如 `github_pat_...`），只保存一次。
 
-## 二、部署 Worker
+## 二、部署 Worker（本项目已部署）
 
-需要 Node 环境。在 `relay/` 目录执行：
+在 `relay/` 目录执行：
 
 ```bash
-npm install -g wrangler        # 或 npx wrangler
-wrangler login                 # 浏览器登录你的 Cloudflare 账号（免费注册）
-wrangler deploy                # 部署，输出形如 https://petsnetclinic-relay.<子域>.workers.dev
-wrangler secret put GITHUB_TOKEN   # 粘贴上一步的 token
-wrangler secret put FORM_KEY       # 提交口令（可留空跳过，但建议设置）
-wrangler secret put ADMIN_KEY      # 删除记录用的管理员口令（记录页删除时需要）
+npx wrangler login                 # 浏览器登录 Cloudflare 账号（免费）
+npx wrangler deploy                # 部署
+npx wrangler secret put GITHUB_TOKEN   # 粘贴上一步的 token
+npx wrangler secret put FORM_KEY       # 提交口令（已设置，见 index.html）
+npx wrangler secret put ADMIN_KEY      # 删除记录的管理员口令（不入仓库）
 ```
 
-部署成功后会得到 Worker 地址，例如：
-`https://petsnetclinic-relay.abc123.workers.dev/`
+**当前线上地址**：`https://petsnetclinic-relay.zoubeacon.com/`
 
-## 三、让网页使用它
+> ⚠️ `workers.dev` 在大陆被 DNS 污染 + SNI 阻断，直连不可用；因此路由绑定到自有域名
+> `zoubeacon.com`（已托管在 Cloudflare）。换子域名改 `wrangler.toml` 的 `[[routes]]` 后重新 deploy。
+> `wrangler.toml` 未写 `workers_dev`，故 workers.dev 入口已关闭。
 
-编辑仓库根目录 `index.html` 与 `records.html`，填写中转地址：
+## 三、让网页使用它（已配置）
+
+`index.html` 与 `records.html` 已填好：
 
 ```js
 // index.html
-const RELAY_URL = "https://petsnetclinic-relay.abc123.workers.dev/";
-const FORM_KEY  = "与上面 FORM_KEY 相同的口令";   // 若未设置 FORM_KEY 则留空
+const RELAY_URL = "https://petsnetclinic-relay.zoubeacon.com/";
+const FORM_KEY  = "见 index.html（与 Worker 的 FORM_KEY 一致）";
 
 // records.html
-const RELAY_URL = "https://petsnetclinic-relay.abc123.workers.dev/";
+const RELAY_URL = "https://petsnetclinic-relay.zoubeacon.com/";
 ```
 
 记录页的「删除」按钮会提示输入 `ADMIN_KEY` 口令（存于浏览器 sessionStorage），口令不会写进网页。
 
-提交并推送后，医生页即变为「提交 → 谢谢」模式，不再跳转 GitHub。
+提交并推送后，医生页即为「提交 → 感谢上传」模式，不再跳转 GitHub。
 
 ## 四、验证
 

@@ -122,16 +122,31 @@ ok(r.status === 400, "缺字段返回 400");
 r = await worker.fetch(new Request("https://relay/", { method: "OPTIONS" }), env);
 ok(r.status === 204, "OPTIONS 预检 204");
 
-// 删除
+// 删除（REST DELETE 实测 404，改走 GraphQL deleteIssue）
 const envAdmin = { ...env, ADMIN_KEY: "admin" };
-let delCalled = null;
-globalThis.fetch = async (u, o) => { if (o && o.method === "DELETE") { delCalled = { u, o }; return new Response(null, { status: 204 }); } return new Response("{}", { status: 200 }); };
+let delCalls = [];
+globalThis.fetch = async (u, o) => {
+  delCalls.push({ u, o });
+  if (/\/issues\/7$/.test(u)) return new Response(JSON.stringify({ node_id: "I_abc" }), { status: 200 });
+  if (u === "https://api.github.com/graphql") {
+    return new Response(JSON.stringify({ data: { deleteIssue: { clientMutationId: null } } }), { status: 200 });
+  }
+  return new Response("{}", { status: 200 });
+};
 r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "bad" }), envAdmin);
 ok(r.status === 401, "删除：口令错误 401");
 r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "admin" }), envAdmin);
 j = await r.json();
 ok(r.status === 200 && j.ok === true && j.deleted === 7, "删除：成功 ok");
-ok(delCalled && delCalled.u === "https://api.github.com/repos/" + REPO + "/issues/7" && delCalled.o.method === "DELETE", "删除：调用 GitHub DELETE");
+ok(delCalls.some(c => /\/issues\/7$/.test(c.u)), "删除：先取 node_id");
+const gqlCall = delCalls.find(c => c.u === "https://api.github.com/graphql");
+ok(!!gqlCall && gqlCall.o.method === "POST" && /deleteIssue/.test(gqlCall.o.body) && /I_abc/.test(gqlCall.o.body), "删除：GraphQL deleteIssue(node_id)");
+
+globalThis.fetch = async () => new Response(JSON.stringify({ message: "deleted" }), { status: 410 });
+r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "admin" }), envAdmin);
+j = await r.json();
+ok(r.status === 200 && j.already === true, "删除：已删除幂等 200");
+
 r = await worker.fetch(mk({ action: "delete" }, { "x-admin-key": "admin" }), envAdmin);
 ok(r.status === 400, "删除：缺 number 400");
 r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "admin" }), env);

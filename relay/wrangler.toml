@@ -2,6 +2,12 @@ name = "petsnetclinic-relay"
 main = "worker.js"
 compatibility_date = "2026-01-01"
 
+# 自有域名（workers.dev 在大陆被墙，改用已在 Cloudflare 的 zoubeacon.com）
+# 若需换子域名，改这里 + 重新 `wrangler deploy`
+[[routes]]
+pattern = "petsnetclinic-relay.zoubeacon.com"
+custom_domain = true
+
 [vars]
 GITHUB_REPO = "gordon310/PetsNetClinic"
 ALLOWED_ORIGIN = "https://gordon310.github.io"
