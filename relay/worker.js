@@ -63,6 +63,25 @@ export default {
     }
 
     const issue = await res.json();
-    return jsonResponse({ ok: true, number: issue.number, url: issue.html_url }, 200, cors);
+
+    // 回查确认记录确实已创建（最多 3 次，规避 GitHub API 短暂延迟）
+    let verified = false;
+    for (let i = 0; i < 3 && !verified; i++) {
+      try {
+        const chk = await fetch("https://api.github.com/repos/" + repo + "/issues/" + issue.number, {
+          headers: {
+            Authorization: "Bearer " + env.GITHUB_TOKEN,
+            Accept: "application/vnd.github+json",
+            "User-Agent": "petsnetclinic-relay",
+          },
+        });
+        verified = chk.ok;
+      } catch (e) {
+        verified = false;
+      }
+      if (!verified) await new Promise((r) => setTimeout(r, 800));
+    }
+
+    return jsonResponse({ ok: true, verified: verified, number: issue.number, url: issue.html_url }, 200, cors);
   },
 };

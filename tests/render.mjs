@@ -55,5 +55,9 @@ ok(Number.isFinite(n), "提交份数已渲染: " + n);
 ok(!/<p id="status"[^>]*>加载失败/.test(records), "无加载失败");
 ok((records.match(/class="card"/g) || []).length >= 1 || n === 0, "明细卡片或空状态正常");
 
+console.log("[感谢] " + BASE + "/thanks.html");
+const thanks = await dump(BASE + "/thanks.html", "thanks");
+ok(thanks.includes("感谢上传"), "感谢页显示「感谢上传」");
+
 console.log("\n结果: " + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

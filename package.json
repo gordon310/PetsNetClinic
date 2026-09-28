@@ -2,6 +2,7 @@
   "name": "petsnetclinic",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "宠物线上问诊小程序 · 医生需求收集与记录",
   "scripts": {
     "test": "node tests/logic.test.mjs",

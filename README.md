@@ -13,6 +13,7 @@
 PetsNetClinic/
 ├── README.md
 ├── index.html                       医生填写页（单按钮提交）
+├── thanks.html                      提交成功后显示「感谢上传」
 ├── records.html                     答卷记录页（完成情况 / 明细 / CSV）
 ├── questionnaire.md                 问卷唯一维护源
 ├── package.json                     测试脚本

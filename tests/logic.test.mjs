@@ -89,15 +89,32 @@ console.log("[4] relay/worker.js");
 const mod = await import("file://" + path.join(ROOT, "relay/worker.js"));
 const worker = mod.default;
 const env = { GITHUB_REPO: REPO, GITHUB_TOKEN: "test", FORM_KEY: "k", ALLOWED_ORIGIN: "https://gordon310.github.io" };
-let captured = null;
-globalThis.fetch = async (u, o) => { captured = { u, o }; return new Response(JSON.stringify({ number: 99, html_url: "x" }), { status: 201 }); };
 const mk = (body, headers = {}) => new Request("https://relay/", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+let captured = null, calls = [];
+globalThis.fetch = async (u, o) => {
+  calls.push(u);
+  if (/\/issues\/\d+$/.test(u)) return new Response(JSON.stringify({ number: 99 }), { status: 200 });
+  captured = { u, o };
+  return new Response(JSON.stringify({ number: 99, html_url: "x" }), { status: 201 });
+};
 let r = await worker.fetch(mk({ title: "t", body: "b" }, { "x-form-key": "k" }), env);
 let j = await r.json();
 ok(r.status === 200 && j.ok === true && j.number === 99, "正常提交返回 ok");
+ok(j.verified === true, "创建后回查校验 verified=true");
+ok(calls.some(u => /\/issues\/99$/.test(u)), "确实发起了回查请求");
 ok(captured.u === "https://api.github.com/repos/" + REPO + "/issues", "调用 GitHub issues API");
 ok(captured.o.headers.Authorization === "Bearer test", "带 token");
 ok(JSON.parse(captured.o.body).labels[0] === "doctor-feedback", "打标签");
+
+// 回查失败 → verified=false
+globalThis.fetch = async (u) => /\/issues\/\d+$/.test(u)
+  ? new Response("nope", { status: 404 })
+  : new Response(JSON.stringify({ number: 5, html_url: "x" }), { status: 201 });
+r = await worker.fetch(mk({ title: "t", body: "b" }, { "x-form-key": "k" }), env);
+j = await r.json();
+ok(j.verified === false, "回查失败 verified=false");
+
+globalThis.fetch = async () => new Response(JSON.stringify({ number: 99, html_url: "x" }), { status: 201 });
 r = await worker.fetch(mk({ title: "t", body: "b" }, { "x-form-key": "bad" }), env);
 ok(r.status === 401, "错误口令被拒 401");
 r = await worker.fetch(mk({ title: "", body: "" }, { "x-form-key": "k" }), env);

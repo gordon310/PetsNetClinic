@@ -27,7 +27,8 @@ npm run test:all              # = logic + render
   1. `index.html`：53 题、单按钮、Markdown 精简、提交 URL 合法、回退 URL 长度
   2. `records.html`：Markdown↔解析往返、线上 Issue 可解析
   3. `export_issues.py`：能导出 CSV/Markdown 且表头正确
-  4. `relay/worker.js`：正常提交/口令错误/缺字段/OPTIONS 预检
+  4. `relay/worker.js`：正常提交/回查校验 verified/口令错误/缺字段/OPTIONS 预检
 - **render.mjs**
   - 填写页真实渲染（题号、按钮、遮罩默认隐藏）
   - 记录页真实拉取 GitHub API 后渲染（份数、无加载错误）
+  - 感谢页显示「感谢上传」
