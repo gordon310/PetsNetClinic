@@ -29,7 +29,7 @@ const md = api.toMarkdown(sample);
 ok(md.includes("- 医生姓名：测试医生"), "Markdown 含医生姓名");
 ok(md.includes("- 填写日期：2026-09-27"), "Markdown 含填写日期");
 ok(!md.includes("所属医院"), "Markdown 无医院字段");
-ok(md.includes("**1.") && md.includes("- 呕吐") && md.includes("- 腹泻"), "多选只列已选");
+ok(md.includes("1. 呕吐；腹泻"), "多选只列已选(精简式)");
 ok(!md.includes("- [ ]") && !md.includes("- [x]"), "多选未输出全部选项");
 ok(!md.includes("（未选择）") && !md.includes("（未回答）"), "跳过未作答");
 
@@ -45,8 +45,8 @@ for (const s of api.SECTIONS) for (const q of s.questions) {
   else full[q.id] = "补充说明";
 }
 const fullUrl = api.issueUrl(full);
-console.log("    全量作答 URL 长度 = " + fullUrl.length);
-ok(fullUrl.length < 30000, "全量 URL 长度 " + fullUrl.length + " < 30000 (回退阈值)");
+console.log("    典型全量 URL 长度 = " + fullUrl.length);
+ok(fullUrl.length < 7500, "典型全量 URL 长度 " + fullUrl.length + " < 7500 (回退阈值)");
 
 // ---------- 2) records.html 解析（往返 + 线上真实数据） ----------
 console.log("[2] records.html 解析");

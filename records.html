@@ -97,26 +97,39 @@ function parseBody(body) {
   const info = {}; const answers = {}; let cur = null;
   (body || "").split("\n").forEach(raw => {
     const line = raw.replace(/\s+$/, "");
-    const m4 = line.match(/^[-*]\s*(医生姓名|填写日期)[：:]\s*(.+)$/);
+    if (!line) return;
+    const m4 = line.match(/^[-*]\s*(医生姓名|填写日期|工号\s*\/\s*联系方式)[：:]\s*(.+)$/);
     if (m4) {
-      const key = { "医生姓名":"doctor_name", "填写日期":"fill_date" }[m4[1]];
+      const key = { "医生姓名": "doctor_name", "填写日期": "fill_date", "工号 / 联系方式": "doctor_contact" }[m4[1]];
       info[key] = m4[2].trim();
       return;
     }
-    const mh = line.match(/^\*\*(\d+)\.\s/);
+    // 标题式：**1. 题干** 或 ### 1. 题干
+    const mh = line.match(/^(?:\*\*|#{2,3}\s*)(\d+)\.\s/);
     if (mh) { cur = "q" + mh[1]; if (!answers[cur]) answers[cur] = []; return; }
+    // 精简式：1. 作答（多选用 ；分隔）
+    if (!/^[-*#>]/.test(line)) {
+      const mq = line.match(/^(\d+)\.\s+(.+)$/);
+      if (mq) {
+        const k = "q" + mq[1]; const t = mq[2].trim();
+        answers[k] = t.indexOf("；") >= 0 ? t.split("；") : t;
+        return;
+      }
+    }
     if (cur) {
       const mc = line.match(/^\s*[-*]\s*\[(x| )\]\s*(.+)$/);
       if (mc) { if (mc[1].toLowerCase() === "x") answers[cur].push(mc[2].trim()); return; }
       const mb = line.match(/^\s*[-*]\s*(.+)$/);
       if (mb) { answers[cur].push(mb[1].trim()); return; }
-      if (line && !/^(#|>|---|\*\*)/.test(line)) { answers[cur].push(line.trim()); return; }
+      if (!/^(#|>|---|\*\*)/.test(line)) { answers[cur].push(line.trim()); return; }
     }
   });
   Object.keys(answers).forEach(k => {
     const arr = answers[k];
-    if (arr.length === 1) answers[k] = arr[0];
-    else if (arr.length === 0) delete answers[k];
+    if (Array.isArray(arr)) {
+      if (arr.length === 1) answers[k] = arr[0];
+      else if (arr.length === 0) delete answers[k];
+    }
   });
   return { info, answers };
 }

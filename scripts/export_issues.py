@@ -97,16 +97,33 @@ def fetch_issues(repo, label):
 
 
 def parse_body(body):
-    """把 Issue 正文解析为 {id: value}。兼容 HTML 表单生成的 Markdown。"""
+    """把 Issue 正文解析为 {id: value}。兼容精简式、标题式与 HTML 表单生成的 Markdown。"""
     answers = {}
     current = None
     for raw in (body or "").splitlines():
         line = raw.rstrip()
-        m = re.match(r"^\*\*(\d+)\.\s", line)
-        if m:
-            current = "q" + m.group(1)
+        if not line:
+            continue
+        m4 = re.match(
+            r"^[-*]\s*(医生姓名|填写日期|工号\s*/\s*联系方式)[：:]\s*(.+)$", line)
+        if m4:
+            key = {
+                "医生姓名": "doctor_name",
+                "填写日期": "fill_date",
+                "工号 / 联系方式": "doctor_contact",
+            }[m4.group(1)]
+            answers[key] = m4.group(2).strip()
+            continue
+        mh = re.match(r"^(?:\*\*|#{2,3}\s*)(\d+)\.\s", line)
+        if mh:
+            current = "q" + mh.group(1)
             answers.setdefault(current, [])
             continue
+        if not re.match(r"^[-*#>]", line):
+            mq = re.match(r"^(\d+)\.\s+(.+)$", line)
+            if mq:
+                answers["q" + mq.group(1)] = mq.group(2).strip()
+                continue
         if current:
             m2 = re.match(r"^\s*[-*]\s*\[(x| )\]\s*(.+)$", line)
             if m2:
@@ -117,18 +134,10 @@ def parse_body(body):
             if m3:
                 answers[current].append(m3.group(1).strip())
                 continue
-            if line and not re.match(r"^(#|>|---|\*\*)", line):
+            if not re.match(r"^(#|>|---|\*\*)", line):
                 answers[current].append(line.strip())
                 continue
-        m4 = re.match(
-            r"^[-*]\s*(医生姓名|填写日期)[：:]\s*(.+)$", line)
-        if m4:
-            key = {
-                "医生姓名": "doctor_name",
-                "填写日期": "fill_date",
-            }[m4.group(1)]
-            answers[key] = m4.group(2).strip()
-    for k, v in answers.items():
+    for k, v in list(answers.items()):
         if isinstance(v, list):
             answers[k] = "；".join(v)
     return answers
