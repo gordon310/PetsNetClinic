@@ -122,5 +122,20 @@ ok(r.status === 400, "缺字段返回 400");
 r = await worker.fetch(new Request("https://relay/", { method: "OPTIONS" }), env);
 ok(r.status === 204, "OPTIONS 预检 204");
 
+// 删除
+const envAdmin = { ...env, ADMIN_KEY: "admin" };
+let delCalled = null;
+globalThis.fetch = async (u, o) => { if (o && o.method === "DELETE") { delCalled = { u, o }; return new Response(null, { status: 204 }); } return new Response("{}", { status: 200 }); };
+r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "bad" }), envAdmin);
+ok(r.status === 401, "删除：口令错误 401");
+r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "admin" }), envAdmin);
+j = await r.json();
+ok(r.status === 200 && j.ok === true && j.deleted === 7, "删除：成功 ok");
+ok(delCalled && delCalled.u === "https://api.github.com/repos/" + REPO + "/issues/7" && delCalled.o.method === "DELETE", "删除：调用 GitHub DELETE");
+r = await worker.fetch(mk({ action: "delete" }, { "x-admin-key": "admin" }), envAdmin);
+ok(r.status === 400, "删除：缺 number 400");
+r = await worker.fetch(mk({ action: "delete", number: 7 }, { "x-admin-key": "admin" }), env);
+ok(r.status === 401, "删除：未配置 ADMIN_KEY 拒绝");
+
 console.log("\n结果: " + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

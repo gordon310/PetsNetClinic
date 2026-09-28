@@ -38,6 +38,7 @@ PetsNetClinic/
 - 仓库：https://github.com/gordon310/PetsNetClinic
 - **医生填写页（单按钮提交）**：https://gordon310.github.io/PetsNetClinic/
 - **答卷记录页（内部查看完成情况）**：https://gordon310.github.io/PetsNetClinic/records.html
+  （每条记录可「删除」，需管理员口令并经中转服务；未部署中转时可回退到 GitHub 手动删除）
 - 医生提交入口（Issue 表单，备用）：https://github.com/gordon310/PetsNetClinic/issues/new/choose
 - 建议在仓库 `Settings → Labels` 保持 `doctor-feedback` 标签存在，便于筛选导出。
 

@@ -18,22 +18,45 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, x-form-key",
+      "Access-Control-Allow-Headers": "Content-Type, x-form-key, x-admin-key",
       "Vary": "Origin",
     };
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (request.method !== "POST") return jsonResponse({ error: "method not allowed" }, 405, cors);
 
-    if (env.FORM_KEY && request.headers.get("x-form-key") !== env.FORM_KEY) {
-      return jsonResponse({ error: "unauthorized" }, 401, cors);
-    }
-
     let data;
     try {
       data = await request.json();
     } catch (e) {
       return jsonResponse({ error: "invalid json" }, 400, cors);
+    }
+
+    // 删除记录（需管理员口令）
+    if (data && data.action === "delete") {
+      if (!env.ADMIN_KEY || request.headers.get("x-admin-key") !== env.ADMIN_KEY) {
+        return jsonResponse({ error: "unauthorized" }, 401, cors);
+      }
+      const number = parseInt(data.number, 10);
+      if (!number) return jsonResponse({ error: "missing number" }, 400, cors);
+      if (!env.GITHUB_REPO || !env.GITHUB_TOKEN) {
+        return jsonResponse({ error: "server not configured" }, 500, cors);
+      }
+      const del = await fetch("https://api.github.com/repos/" + env.GITHUB_REPO + "/issues/" + number, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + env.GITHUB_TOKEN,
+          Accept: "application/vnd.github+json",
+          "User-Agent": "petsnetclinic-relay",
+        },
+      });
+      if (del.status === 204) return jsonResponse({ ok: true, deleted: number }, 200, cors);
+      return jsonResponse({ error: "github_error", status: del.status }, 502, cors);
+    }
+
+    // 创建记录（可用 FORM_KEY 口令）
+    if (env.FORM_KEY && request.headers.get("x-form-key") !== env.FORM_KEY) {
+      return jsonResponse({ error: "unauthorized" }, 401, cors);
     }
 
     const title = String(data.title || "").slice(0, 200);

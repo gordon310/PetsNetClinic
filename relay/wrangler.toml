@@ -7,5 +7,6 @@ GITHUB_REPO = "gordon310/PetsNetClinic"
 ALLOWED_ORIGIN = "https://gordon310.github.io"
 
 # 密钥不写在此文件，用命令设置：
-#   wrangler secret put GITHUB_TOKEN
-#   wrangler secret put FORM_KEY
+#   wrangler secret put GITHUB_TOKEN   # Issues: read & write
+#   wrangler secret put FORM_KEY       # 提交口令（可选）
+#   wrangler secret put ADMIN_KEY      # 删除记录的管理员口令

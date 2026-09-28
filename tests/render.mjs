@@ -54,6 +54,7 @@ const n = Number((total.match(/>(\d+)</) || [])[1]);
 ok(Number.isFinite(n), "提交份数已渲染: " + n);
 ok(!/<p id="status"[^>]*>加载失败/.test(records), "无加载失败");
 ok((records.match(/class="card"/g) || []).length >= 1 || n === 0, "明细卡片或空状态正常");
+ok(n === 0 || /data-del="\d+"/.test(records), "每条记录含删除按钮");
 
 console.log("[感谢] " + BASE + "/thanks.html");
 const thanks = await dump(BASE + "/thanks.html", "thanks");
